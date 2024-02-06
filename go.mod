@@ -26,4 +26,4 @@ replace word-it-out/game/service => ./game/service
 
 replace word-it-out/repository => ./repository
 
-go 1.21.6
+go 1.21

@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-  myApp := a.App{}
+  myApp := app.App{}
   myApp.Run()
 }
 

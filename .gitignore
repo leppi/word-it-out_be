@@ -12,5 +12,8 @@
 # environment file
 .env
 
+# executable files
+word-it-out
+
 # Go workspace file
 go.work

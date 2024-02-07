@@ -61,7 +61,7 @@ func (a *App) Run() {
     // Start secure server
     log.Print("Starting secure server on port " + os.Getenv("PORT"))
     log.Fatal(http.ListenAndServeTLS(
-      os.Getenv("PORT"),
+      ":" + os.Getenv("PORT"),
       os.Getenv("CERT_DIR") + os.Getenv("CERT_FILE"),
       os.Getenv("CERT_DIR") + os.Getenv("KEY_FILE"),
       a.Router,

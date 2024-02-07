@@ -36,7 +36,7 @@ func (r *GameRepository) InsertWords(words []string) {
 
 func (r *GameRepository) WordExists(word string) (bool, error) {
   var found bool
-  err := r.con.QueryRow("SELECT EXISTS(SELECT 1 FROM words WHERE word = ? COLLATE utf8mb4_unicode_ci) as found", word).Scan(&found)
+  err := r.con.QueryRow("SELECT EXISTS(SELECT 1 FROM words WHERE word = ?) AS found", word).Scan(&found)
 
   if err != nil {
     return false, err

@@ -1,6 +1,7 @@
 package service
 
 import (
+  "log"
   "strings"
   "encoding/json"
   "word-it-out/game/types"
@@ -51,6 +52,8 @@ func CompareWord(guess []string, dailyWord types.Word) []map[string]string {
   charMap := getCharMap(dailyWord)
 
   var result []map[string]string
+  
+  // first mark the correct letters. Then mark the found letters. 
   for i, letter := range guess {
     entry := make(map[string]string)
     key := string(letter)
@@ -58,19 +61,36 @@ func CompareWord(guess []string, dailyWord types.Word) []map[string]string {
     // set result key as guess letter and value as "correct" or "found" or "missed"
     if dailyWordLetters[i] == letter {
       entry[key] = CORRECT
-    } else if strings.Contains(dailyWord.Word, letter) && charMap[rune(letter[0])] > 0 {
-      entry[key] = FOUND
+      charMap[rune(letter[0])]--
+
     } else {
       entry[key] = MISSED
     }
 
-    // decrement char map
-    charMap[rune(letter[0])]--
-
-
     result = append(result, entry)
   }
 
+  
+  // now loop result and set found letters
+  // we need to iterate over the guess twice because letter can be found first and then be correct in the same guess
+  for _, entry := range result {
+    for key, value := range entry {
+      if value == MISSED && strings.Contains(dailyWord.Word, key) && charMap[rune(key[0])] > 0 {
+        entry[key] = FOUND
+      }
+
+      charMap[rune(key[0])]--
+    }
+  }
+
+  log.Println(result)
+  /*
+    if strings.Contains(dailyWord.Word, letter) && charMap[rune(letter[0])] > 0 {
+      entry[key] = FOUND
+    } 
+    // decrement char map
+    charMap[rune(letter[0])]--
+    */
   return result
 }
 

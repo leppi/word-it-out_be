@@ -170,7 +170,7 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
       responseNotification = types.Notification{Type: "success", Message: "Päihitit päivän Sepon"}
     } else if isComplete && !isWon {
       game.Streak = 0
-      responseNotification = types.Notification{Type: "error", Message: "Parempi onni ensi kerralla"}
+      responseNotification = types.Notification{Type: "error", Message: "Seppo päihitti sinut sanalla ”" + dailyWord.Word + "”"}
     }
 
     // set session data

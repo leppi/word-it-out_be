@@ -7,6 +7,8 @@ type Game struct {
   IsComplete bool `json:"isComplete"`
   IsWon bool `json:"isWon"`
   Guesses [][]map[string]string `json:"guesses"`
+  UsedAt string `json:"date"`
+  Streak int `json:"streak"`
 }
 
 type Notification struct {

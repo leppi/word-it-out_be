@@ -1,7 +1,6 @@
 package service
 
 import (
-  "log"
   "strings"
   "encoding/json"
   "word-it-out/game/types"
@@ -83,14 +82,6 @@ func CompareWord(guess []string, dailyWord types.Word) []map[string]string {
     }
   }
 
-  log.Println(result)
-  /*
-    if strings.Contains(dailyWord.Word, letter) && charMap[rune(letter[0])] > 0 {
-      entry[key] = FOUND
-    } 
-    // decrement char map
-    charMap[rune(letter[0])]--
-    */
   return result
 }
 

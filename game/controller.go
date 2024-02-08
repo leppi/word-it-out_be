@@ -62,17 +62,10 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  // check if game is currently active
-  if service.GameIsActive(game, dailyWord) {
-    // check if game is over
-    isComplete, isWon := service.GameIsComplete(game)
-
-    // set game data
-    game.IsComplete = isComplete
-    game.IsWon = isWon
-  } else {
+  // check if game is not currently active
+  if !service.GameIsActive(game, dailyWord) {
     // init new game
-    game = types.Game{Guesses: [][]map[string]string{}, IsComplete: false, IsWon: false}
+    game = types.Game{ Guesses: [][]map[string]string{}, UsedAt: dailyWord.UsedAt.String, IsComplete: false, IsWon: false, Guid: dailyWord.Guid, Streak: game.Streak }
 
     // replace game data
     if err := service.SetGameToSession(session, game); err != nil {
@@ -136,19 +129,23 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
 
   // if game is complete, return
   if isComplete, _ := service.GameIsComplete(game); isComplete {
-    handleNotificationResponse(w, types.Notification{Type: "success", Message: "Game is complete"})
+    handleNotificationResponse(w, types.Notification{Type: "success", Message: "Olet jo päihittänyt päivän Sepon"})
     return
   }
 
-  if wordExists, _ := c.Repository.WordExists(strings.Join(guess, "")); !wordExists {
-    handleNotificationResponse(w, types.Notification{Type: "error", Message: "Word does not exist in sanaseppo"})
+  guessStr := strings.Join(guess, "")
+  if wordExists, _ := c.Repository.WordExists(guessStr); !wordExists {
+    handleNotificationResponse(w, types.Notification{Type: "error", Message: "Seppo ei tunne sanaa ”" + guessStr + "”"})
     return
   }
+
+  // define response notification
+  var responseNotification types.Notification
 
   // check word boundaries
-  clientNotification, ok := service.CheckWordBoundaries(guess, game)
-
-  if ok {
+  if boundaryError, ok := service.CheckWordBoundaries(guess, game); !ok {
+    responseNotification = boundaryError
+  } else {
     // fetch daily word
     dailyWord, err := c.Repository.GetDailyWord()
 
@@ -162,8 +159,20 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
 
     // set game data
     game.Guesses = append(game.Guesses, compareResult)
-    game.Guid = dailyWord.Guid
-    
+
+    // check game status
+    isComplete, isWon := service.GameIsComplete(game)
+    game.IsComplete = isComplete
+    game.IsWon = isWon
+
+    if isWon && isComplete {
+      game.Streak++
+      responseNotification = types.Notification{Type: "success", Message: "Päihitit päivän Sepon"}
+    } else if isComplete && !isWon {
+      game.Streak = 0
+      responseNotification = types.Notification{Type: "error", Message: "Parempi onni ensi kerralla"}
+    }
+
     // set session data
     if err := service.SetGameToSession(session, game); err != nil {
       handleError(w, err)
@@ -177,7 +186,7 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
     }
   }
 
-  handleNotificationResponse(w, clientNotification)
+  handleNotificationResponse(w, responseNotification)
 }
 
 func (c *Controller) PostWord(w http.ResponseWriter, r *http.Request) {

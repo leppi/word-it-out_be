@@ -17,20 +17,15 @@ const (
 )
 
 // internal function to get key and value from map
-func getKeyAndValueFromMap(letterMap map[string]string) (string, string) {
-	for key, value := range letterMap {
-		return key, value
-	}
-	return "", "" // Return empty strings if the map is empty (should not happen in this context)
+func getKeyAndValueFromMap(letterMap []string) (string, string) {
+  return letterMap[0], letterMap[1]
 }
 
 // create a word from guess mapping
-func concatenateKeys(previousGuess []map[string]string) string {
+func concatenateKeys(previousGuess [][]string) string {
 	var keys []string
 	for _, letterMap := range previousGuess {
-		for key := range letterMap {
-			keys = append(keys, key)
-		}
+    keys = append(keys, letterMap[0])
 	}
 	return strings.Join(keys, "")
 }
@@ -43,27 +38,27 @@ func getCharMap(word types.Word) map[rune]int {
   return charMap
 }
 
-func CompareWord(guess []string, dailyWord types.Word) []map[string]string {
+func CompareWord(guess []string, dailyWord types.Word) [][]string {
   // split daily word into array of letters
   dailyWordLetters := strings.Split(dailyWord.Word, "")
 
   // get char map of daily word
   charMap := getCharMap(dailyWord)
 
-  var result []map[string]string
+  var result [][]string
   
   // first mark the correct letters. Then mark the found letters. 
   for i, letter := range guess {
-    entry := make(map[string]string)
+    entry := make([]string, 2)
     key := string(letter)
     // match each letter in guess to daily word
     // set result key as guess letter and value as "correct" or "found" or "missed"
     if dailyWordLetters[i] == letter {
-      entry[key] = CORRECT
+      entry = []string{key, CORRECT}
       charMap[rune(letter[0])]--
 
     } else {
-      entry[key] = MISSED
+      entry = []string{key, MISSED}
     }
 
     result = append(result, entry)
@@ -72,14 +67,13 @@ func CompareWord(guess []string, dailyWord types.Word) []map[string]string {
   
   // now loop result and set found letters
   // we need to iterate over the guess twice because letter can be found first and then be correct in the same guess
-  for _, entry := range result {
-    for key, value := range entry {
-      if value == MISSED && strings.Contains(dailyWord.Word, key) && charMap[rune(key[0])] > 0 {
-        entry[key] = FOUND
-      }
-
-      charMap[rune(key[0])]--
+  for i, entry := range result {
+    key := entry[0]
+    value := entry[1]
+    if value == MISSED && strings.Contains(dailyWord.Word, key) && charMap[rune(key[0])] > 0 {
+      result[i][1] = FOUND
     }
+    charMap[rune(key[0])]--
   }
 
   return result
@@ -115,7 +109,7 @@ func GetGameFromSession(session *sessions.Session) (types.Game, error) {
     }
   } else {
     // init empty game
-    game = types.Game{Guesses: [][]map[string]string{}}
+    game = types.Game{ Guesses: [][][]string{}, IsComplete: false, IsWon: false, Streak: 0}
   }
   return game, nil
 }

@@ -65,7 +65,9 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
   // check if game is not currently active
   if !service.GameIsActive(game, dailyWord) {
     // init new game
-    game = types.Game{ Guesses: [][]map[string]string{}, UsedAt: dailyWord.UsedAt.String, IsComplete: false, IsWon: false, Guid: dailyWord.Guid, Streak: game.Streak }
+    game.Guid = dailyWord.Guid
+    game.UsedAt = dailyWord.UsedAt.String
+    game.Streak = game.Streak
 
     // replace game data
     if err := service.SetGameToSession(session, game); err != nil {

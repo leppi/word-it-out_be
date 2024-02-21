@@ -6,7 +6,7 @@ type Game struct {
   Guid string `json:"guid"`
   IsComplete bool `json:"isComplete"`
   IsWon bool `json:"isWon"`
-  Guesses [][]map[string]string `json:"guesses"`
+  Guesses [][][]string `json:"guesses"`
   UsedAt string `json:"date"`
   Streak int `json:"streak"`
 }

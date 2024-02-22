@@ -68,6 +68,7 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
     game.Guid = dailyWord.Guid
     game.UsedAt = dailyWord.UsedAt.String
     game.Streak = game.Streak
+    game.Guesses = [][][]string{}
 
     // replace game data
     if err := service.SetGameToSession(session, game); err != nil {

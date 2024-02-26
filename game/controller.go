@@ -68,6 +68,8 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
     game.Guid = dailyWord.Guid
     game.UsedAt = dailyWord.UsedAt.String
     game.Streak = game.Streak
+    game.IsComplete = false
+    game.IsWon = false
     game.Guesses = [][][]string{}
 
     // replace game data

@@ -6,6 +6,7 @@ import (
   "word-it-out/game/types"
   "github.com/gorilla/sessions"
   "fmt"
+  "time"
 )
 
 // create enums for correct, found, missed
@@ -40,7 +41,7 @@ func getCharMap(word types.Word) map[rune]int {
 
 func CompareWord(guess []string, dailyWord types.Word) [][]string {
   // split daily word into array of letters
-  dailyWordLetters := strings.Split(dailyWord.Word, "")
+  dailyWordRunes := []rune(dailyWord.Word)
 
   // get char map of daily word
   charMap := getCharMap(dailyWord)
@@ -53,7 +54,7 @@ func CompareWord(guess []string, dailyWord types.Word) [][]string {
     key := string(letter)
     // match each letter in guess to daily word
     // set result key as guess letter and value as "correct" or "found" or "missed"
-    if dailyWordLetters[i] == letter {
+    if dailyWordRunes[i] == []rune(key)[0] {
       entry = []string{key, CORRECT}
       charMap[rune(letter[0])]--
 
@@ -70,10 +71,14 @@ func CompareWord(guess []string, dailyWord types.Word) [][]string {
   for i, entry := range result {
     key := entry[0]
     value := entry[1]
-    if value == MISSED && strings.Contains(dailyWord.Word, key) && charMap[rune(key[0])] > 0 {
+    // make sure runeKey is in utf8 format
+    runeKey := []rune(key)[0]
+
+    //if value == MISSED && strings.ContainsRune(dailyWord.Word, runeKey) && charMap[runeKey] > 0 {
+		if value == MISSED && charMap[runeKey] > 0 {
       result[i][1] = FOUND
     }
-    charMap[rune(key[0])]--
+    charMap[runeKey]--
   }
 
   return result
@@ -94,6 +99,30 @@ func SetGameToSession(session *sessions.Session, game types.Game) error {
   session.Values["gamedata"] = string(jsonGameData)
 
   return nil
+}
+
+func GameIsTooOld(game types.Game, dailyWord types.Word) bool {
+  // validate date
+  if !dailyWord.UsedAt.Valid || game.UsedAt == "" {
+    return true
+  }
+  // check if date string day difference is over 1
+  layout := "2006-01-02"
+  gameDate, err := time.Parse(layout, game.UsedAt)
+	if err != nil {
+		fmt.Println("Virhe pelipäivämäärän muuntamisessa:", err)
+		return true
+	}
+
+  dailyWordDate, err := time.Parse(layout, dailyWord.UsedAt.String)
+	if err != nil {
+		fmt.Println("Virhe päivittäisen sanan päivämäärän muuntamisessa:", err)
+		return true
+	}
+
+  dateDifference := dailyWordDate.Sub(gameDate).Hours() / 24
+
+	return dateDifference > 1
 }
 
 func GetGameFromSession(session *sessions.Session) (types.Game, error) {

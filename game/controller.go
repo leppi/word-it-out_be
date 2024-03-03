@@ -67,7 +67,11 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
     // init new game
     game.Guid = dailyWord.Guid
     game.UsedAt = dailyWord.UsedAt.String
-    game.Streak = game.Streak
+    if service.GameIsTooOld(game, dailyWord) {
+      game.Streak = 0
+    } else {
+      game.Streak = game.Streak
+    }
     game.IsComplete = false
     game.IsWon = false
     game.Guesses = [][][]string{}

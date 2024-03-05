@@ -74,8 +74,8 @@ func CompareWord(guess []string, dailyWord types.Word) [][]string {
     // make sure runeKey is in utf8 format
     runeKey := []rune(key)[0]
 
-    //if value == MISSED && strings.ContainsRune(dailyWord.Word, runeKey) && charMap[runeKey] > 0 {
-		if value == MISSED && charMap[runeKey] > 0 {
+		// if value == MISSED && charMap[runeKey] > 0 {
+    if value == MISSED && strings.ContainsRune(dailyWord.Word, runeKey) && charMap[runeKey] > 0 {
       result[i][1] = FOUND
     }
     charMap[runeKey]--

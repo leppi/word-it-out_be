@@ -1,6 +1,8 @@
 package game
 
 import (
+  "net/http"
+  "github.com/gorilla/sessions"
   "log"
   "database/sql"
   "word-it-out/repository"
@@ -31,6 +33,19 @@ func (r *GameRepository) InsertWords(words []string) {
     if err != nil {
       log.Fatal(err)
     }
+  }
+}
+
+func (r *GameRepository) InsertResult(req *http.Request, session *sessions.Session, game types.Game) {
+  // save game result to database
+  stmt, err := r.con.Prepare("INSERT INTO results (guid, game, user_id, ip_address, referer, user_agent, guesses, is_won, created_at) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)")
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer stmt.Close()
+  _, err = stmt.Exec(game.Guid, session.Values["id"], req.RemoteAddr, req.Referer(), req.UserAgent(), len(game.Guesses), game.IsWon)
+  if err != nil {
+    log.Fatal(err)
   }
 }
 

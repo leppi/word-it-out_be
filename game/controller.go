@@ -65,13 +65,14 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
   // check if game is not currently active
   if !service.GameIsActive(game, dailyWord) {
     // init new game
-    game.Guid = dailyWord.Guid
-    game.UsedAt = dailyWord.UsedAt.String
     if service.GameIsTooOld(game, dailyWord) {
       game.Streak = 0
     } else {
       game.Streak = game.Streak
     }
+
+    game.Guid = dailyWord.Guid
+    game.UsedAt = dailyWord.UsedAt.String
     game.IsComplete = false
     game.IsWon = false
     game.Guesses = [][][]string{}
@@ -182,6 +183,11 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
       responseNotification = types.Notification{Type: "error", Message: "Seppo päihitti sinut sanalla ”" + dailyWord.Word + "”"}
     }
 
+    // save result into database
+    if isWon {
+      c.Repository.InsertResult(r, session, game)
+    }
+
     // set session data
     if err := service.SetGameToSession(session, game); err != nil {
       handleError(w, err)
@@ -223,9 +229,5 @@ func (c *Controller) PostWord(w http.ResponseWriter, r *http.Request) {
   c.Repository.InsertWords(words)
 
   w.WriteHeader(http.StatusOK)
-
-
-
-  
 }
 

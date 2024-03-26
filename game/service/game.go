@@ -7,6 +7,7 @@ import (
   "github.com/gorilla/sessions"
   "fmt"
   "time"
+  "github.com/google/uuid"
 )
 
 // create enums for correct, found, missed
@@ -16,6 +17,16 @@ const (
   MISSED = "missed"
   GAME_LENGTH = 6
 )
+
+func generateUUID() string {
+  id, err := uuid.NewRandom()
+  if err != nil {
+    fmt.Println("Error generating UUID:", err)
+    return ""
+  }
+  return id.String()
+}
+
 
 // internal function to get key and value from map
 func getKeyAndValueFromMap(letterMap []string) (string, string) {
@@ -45,7 +56,6 @@ func CompareWord(guess []string, dailyWord types.Word) [][]string {
 
   // get char map of daily word
   charMap := getCharMap(dailyWord)
-
   var result [][]string
   
   // first mark the correct letters. Then mark the found letters. 
@@ -73,12 +83,10 @@ func CompareWord(guess []string, dailyWord types.Word) [][]string {
     value := entry[1]
     // make sure runeKey is in utf8 format
     runeKey := []rune(key)[0]
-
-		// if value == MISSED && charMap[runeKey] > 0 {
     if value == MISSED && strings.ContainsRune(dailyWord.Word, runeKey) && charMap[runeKey] > 0 {
       result[i][1] = FOUND
+      charMap[runeKey]--
     }
-    charMap[runeKey]--
   }
 
   return result
@@ -93,6 +101,11 @@ func SetGameToSession(session *sessions.Session, game types.Game) error {
   jsonGameData, err := json.Marshal(game)
   if err != nil {
     return err
+  }
+
+  // create session id if it doesn't exist
+  if session.Values["id"] == nil {
+    session.Values["id"] = generateUUID()
   }
 
   // set session data
@@ -146,7 +159,7 @@ func GetGameFromSession(session *sessions.Session) (types.Game, error) {
 func CheckWordBoundaries(guess []string, game types.Game) (types.Notification, bool) {
   // word must be exactly 5 letters long
   if len(guess) != 5 {
-    return types.Notification{Type: "error", Message: "Word must be exactly 5 letters long"}, false
+    return types.Notification{Type: "error", Message: "Sanan pitää olla 5 merkkiä pitkä"}, false
   }
 
   // if previous guess exists
@@ -155,7 +168,7 @@ func CheckWordBoundaries(guess []string, game types.Game) (types.Notification, b
     // word must be different from any previous guesses
     for _, previousGuess := range game.Guesses {
       if strings.Join(guess, "") == concatenateKeys(previousGuess) {
-        return types.Notification{Type: "error", Message: "Word must be different from previous guesses"}, false
+        return types.Notification{Type: "error", Message: fmt.Sprintf("Olet jo arvannut sanan ”%s”", strings.Join(guess, ""))}, false
       }
     }
 
@@ -164,10 +177,10 @@ func CheckWordBoundaries(guess []string, game types.Game) (types.Notification, b
         char, status := getKeyAndValueFromMap(previousGuess[i])
         if status == CORRECT && char != letter {
           // each letter in CORRECT must be in the same position as previous guess
-          return types.Notification{Type: "error", Message: fmt.Sprintf("Letter ”%s” must be in the same position as previous guess", char)}, false
+          return types.Notification{Type: "error", Message: fmt.Sprintf("Kirjaimen ”%s” on oltava oikealla paikallaan", char)}, false
         } else if status == FOUND && !strings.Contains(strings.Join(guess, ""), char) {
           // each letter in FOUND must exist in guess
-          return types.Notification{Type: "error", Message: fmt.Sprintf("Letter ”%s” must exists in guess", char)}, false
+          return types.Notification{Type: "error", Message: fmt.Sprintf("Kirjain ”%s” täytyy esiintyä arvauksessa", char)}, false
         }
       }
     }

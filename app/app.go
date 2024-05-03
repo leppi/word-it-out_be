@@ -55,6 +55,7 @@ func (a *App) Run() {
   a.Router.HandleFunc("/word", gameController.PostWord).Methods("POST", "OPTIONS")
   a.Router.HandleFunc("/guess", gameController.PostGuess).Methods("POST", "OPTIONS")
   a.Router.HandleFunc("/game", gameController.GetGame).Methods("GET", "OPTIONS")
+  a.Router.HandleFunc("/debug", gameController.GetDebug).Methods("GET")
 
   // check if certificate files are set
   if os.Getenv("CERT_DIR") != "" && os.Getenv("CERT_FILE") != "" && os.Getenv("KEY_FILE") != "" {

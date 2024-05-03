@@ -21,3 +21,9 @@ type Word struct {
   Word string
   UsedAt sql.NullString
 }
+
+type Debug struct {
+  Guid string `json:"guid"`
+  Runes [][] rune `json:"runes"`
+}
+

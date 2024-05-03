@@ -44,6 +44,30 @@ func handleNotificationResponse(w http.ResponseWriter, notification types.Notifi
     w.Write(notificationJson)
 }
 
+// debug session data.
+func (c *Controller) GetDebug(w http.ResponseWriter, r *http.Request) {
+  session := context.Get(r, "session").(*sessions.Session)
+  // fetch game data from session
+  game, err := service.GetGameFromSession(session)
+  if err != nil {
+    handleError(w, err)
+    return
+  }
+
+  // create debug data
+  debug := service.CreateDebugData(game)
+
+  // create json response
+  debugData, err := json.Marshal(debug)
+  if err != nil {
+    handleError(w, err)
+    return
+  }
+  // serialize debug data
+  w.Header().Set("Content-Type", "application/json")
+  w.Write(debugData)
+}
+
 func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
   // fetch existing session
   session := context.Get(r, "session").(*sessions.Session)

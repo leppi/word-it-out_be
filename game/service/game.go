@@ -138,6 +138,23 @@ func GameIsTooOld(game types.Game, dailyWord types.Word) bool {
 	return dateDifference > 1
 }
 
+func CreateDebugData(game types.Game) types.Debug {
+  // create debug data
+  var debugData types.Debug
+  debugData.Guid = game.Guid
+  debugData.Runes = [][]rune{}
+  for _, guess := range game.Guesses {
+    var runes []rune
+    for _, letterMap := range guess {
+      key, _ := getKeyAndValueFromMap(letterMap)
+      runes = append(runes, []rune(key)[0])
+    }
+    debugData.Runes = append(debugData.Runes, runes)
+  }
+
+  return debugData
+}
+
 func GetGameFromSession(session *sessions.Session) (types.Game, error) {
   // create game struct
   var game types.Game

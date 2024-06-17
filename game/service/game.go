@@ -57,16 +57,18 @@ func CompareWord(guess []string, dailyWord types.Word) [][]string {
   // get char map of daily word
   charMap := getCharMap(dailyWord)
   var result [][]string
-  
+
   // first mark the correct letters. Then mark the found letters. 
   for i, letter := range guess {
     entry := make([]string, 2)
     key := string(letter)
+    runeKey := []rune(key)[0]
+
     // match each letter in guess to daily word
     // set result key as guess letter and value as "correct" or "found" or "missed"
-    if dailyWordRunes[i] == []rune(key)[0] {
+    if dailyWordRunes[i] == runeKey {
       entry = []string{key, CORRECT}
-      charMap[rune(letter[0])]--
+      charMap[runeKey]--
 
     } else {
       entry = []string{key, MISSED}
@@ -133,9 +135,10 @@ func GameIsTooOld(game types.Game, dailyWord types.Word) bool {
 		return true
 	}
 
+  // calculate date difference
   dateDifference := dailyWordDate.Sub(gameDate).Hours() / 24
 
-	return dateDifference > 1
+	return dateDifference > 0
 }
 
 func CreateDebugData(game types.Game) types.Debug {

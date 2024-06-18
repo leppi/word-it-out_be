@@ -11,8 +11,7 @@ import (
   "word-it-out/game"
 )
 
-// CreateCookieStore creates a new cookie store with the hash key from environment variable
-func CreateCookieStore() *sessions.CookieStore {
+func CreateSessionStore() *sessions.CookieStore {
   store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
   store.Options = &sessions.Options{
     Path:     "/",
@@ -97,7 +96,7 @@ func sessionMiddleware(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     // Fetch session
-		session, err := CreateCookieStore().Get(r, os.Getenv("SESSION_NAME"))
+		session, err := CreateSessionStore().Get(r, os.Getenv("SESSION_NAME"))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

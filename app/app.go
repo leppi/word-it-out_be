@@ -1,4 +1,4 @@
-package app
+package uapp
 
 import (
   "log"
@@ -11,14 +11,12 @@ import (
   "word-it-out/game"
 )
 
-// CreateCookieStore creates a new cookie store with the hash key from environment variable
-func CreateSessionStore() *mysqlstore.MySQLStore {
-  // Load environment variables
-  err := godotenv.Load()
-
-  // Check if environment variables are loaded
-  if err != nil {
-    log.Fatal("Error loading .env file")
+func CreateSessionStore() *sessions.CookieStore {
+  store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+  store.Options = &sessions.Options{
+    Path:     "/",
+    MaxAge:   86400 * 7, // 7 days
+    HttpOnly: true,
   }
 
   // Create new database store

@@ -207,11 +207,6 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
       responseNotification = types.Notification{Type: "error", Message: "Seppo päihitti sinut sanalla ”" + dailyWord.Word + "”"}
     }
 
-    // save result into database
-    if isWon {
-      c.Repository.InsertResult(r, session, game)
-    }
-
     // set session data
     if err := service.SetGameToSession(session, game); err != nil {
       handleError(w, err)

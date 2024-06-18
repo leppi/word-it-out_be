@@ -1,10 +1,11 @@
-package uapp
+package app
 
 import (
   "log"
   "net/http"
   "github.com/gorilla/mux"
   "github.com/joho/godotenv"
+  "github.com/gorilla/sessions"
   "github.com/gorilla/context"
   "os"
   "word-it-out/game"
@@ -18,15 +19,9 @@ func CreateSessionStore() *sessions.CookieStore {
     HttpOnly: true,
   }
 
-  // Create new database store
-  store, err := mysqlstore.NewMySQLStore(os.Getenv("DB_USER")+":"+os.Getenv("DB_PASSWORD")+"@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME"), os.Getenv("SESSION_TABLE"), "/", 86400 * 7, []byte(os.Getenv("SESSION_SECRET")))
-  if err != nil {
-    log.Fatal(err)
-  }
-
   return store 
-  
 }
+
 type App struct {
   Router *mux.Router
 }

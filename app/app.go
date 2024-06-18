@@ -6,21 +6,29 @@ import (
   "github.com/gorilla/mux"
   "github.com/joho/godotenv"
   "github.com/gorilla/context"
-  "github.com/gorilla/sessions"
+  "github.com/srinathgs/mysqlstore"
   "os"
   "word-it-out/game"
 )
 
 // CreateCookieStore creates a new cookie store with the hash key from environment variable
-func CreateCookieStore() *sessions.CookieStore {
-  store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
-  store.Options = &sessions.Options{
-    Path:     "/",
-    MaxAge:   86400 * 7, // 7 days
-    HttpOnly: true,
+func CreateSessionStore() *mysqlstore.MySQLStore {
+  // Load environment variables
+  err := godotenv.Load()
+
+  // Check if environment variables are loaded
+  if err != nil {
+    log.Fatal("Error loading .env file")
   }
 
-  return store
+  // Create new database store
+  store, err := mysqlstore.NewMySQLStore(os.Getenv("DB_USER")+":"+os.Getenv("DB_PASSWORD")+"@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME"), os.Getenv("SESSION_TABLE"), "/", 3600, []byte(os.Getenv("SESSION_SECRET")))
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  return store 
+  
 }
 type App struct {
   Router *mux.Router
@@ -97,7 +105,7 @@ func sessionMiddleware(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     // Fetch session
-		session, err := CreateCookieStore().Get(r, os.Getenv("SESSION_NAME"))
+		session, err := CreateSessionStore().Get(r, os.Getenv("SESSION_NAME"))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

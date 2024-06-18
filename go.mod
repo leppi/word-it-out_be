@@ -12,6 +12,7 @@ require (
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.2.2 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/srinathgs/mysqlstore v0.0.0-20231123182912-ffbca72c0a70 // indirect
 	word-it-out/game/service v0.0.0-00010101000000-000000000000 // indirect
 	word-it-out/game/types v0.0.0-00010101000000-000000000000 // indirect
 	word-it-out/repository v0.0.0-00010101000000-000000000000 // indirect

@@ -138,6 +138,12 @@ func GameIsTooOld(game types.Game, dailyWord types.Word) bool {
   // calculate date difference
   dateDifference := dailyWordDate.Sub(gameDate).Hours() / 24
 
+  // if game is won, value 1 is acceptable
+  if game.IsWon {
+    return dateDifference > 1
+  }
+
+  // if game is not won, check if date difference is over 0
 	return dateDifference > 0
 }
 

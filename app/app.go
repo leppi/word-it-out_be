@@ -22,7 +22,7 @@ func CreateSessionStore() *mysqlstore.MySQLStore {
   }
 
   // Create new database store
-  store, err := mysqlstore.NewMySQLStore(os.Getenv("DB_USER")+":"+os.Getenv("DB_PASSWORD")+"@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME"), os.Getenv("SESSION_TABLE"), "/", 3600, []byte(os.Getenv("SESSION_SECRET")))
+  store, err := mysqlstore.NewMySQLStore(os.Getenv("DB_USER")+":"+os.Getenv("DB_PASSWORD")+"@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME"), os.Getenv("SESSION_TABLE"), "/", 86400 * 7, []byte(os.Getenv("SESSION_SECRET")))
   if err != nil {
     log.Fatal(err)
   }

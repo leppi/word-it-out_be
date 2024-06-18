@@ -6,7 +6,6 @@ import (
   "github.com/gorilla/mux"
   "github.com/joho/godotenv"
   "github.com/gorilla/context"
-  "github.com/srinathgs/mysqlstore"
   "os"
   "word-it-out/game"
 )

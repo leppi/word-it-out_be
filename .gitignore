@@ -17,3 +17,6 @@ word-it-out
 
 # Go workspace file
 go.work
+
+# Local Go build cache used in sandboxed builds
+.gocache/

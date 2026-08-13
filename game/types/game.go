@@ -9,6 +9,8 @@ type Game struct {
   Guesses [][][]string `json:"guesses"`
   UsedAt string `json:"date"`
   Streak int `json:"streak"`
+  BruteForceCount int `json:"bruteForceCount"`
+  BruteForceLimit int `json:"bruteForceLimit"`
 }
 
 type Notification struct {

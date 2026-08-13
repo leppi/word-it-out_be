@@ -16,6 +16,7 @@ const (
   FOUND = "found"
   MISSED = "missed"
   GAME_LENGTH = 6
+  BRUTE_FORCE_LIMIT = 15
 )
 
 func generateUUID() string {

@@ -100,6 +100,7 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
     game.IsComplete = false
     game.IsWon = false
     game.Guesses = [][][]string{}
+    game.BruteForceCount = 0
 
     // replace game data
     if err := service.SetGameToSession(session, game); err != nil {
@@ -113,6 +114,9 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
       return
     }
   }
+
+  // report current brute force limit
+  game.BruteForceLimit = service.BRUTE_FORCE_LIMIT
 
   // create json response
   jsonGameData, err := json.Marshal(game)
@@ -169,7 +173,38 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
 
   guessStr := strings.Join(guess, "")
   if wordExists, _ := c.Repository.WordExists(guessStr); !wordExists {
-    handleNotificationResponse(w, types.Notification{Type: "error", Message: "Seppo ei tunne sanaa ”" + guessStr + "”"})
+    game.BruteForceCount++
+
+    var notification types.Notification
+    if game.BruteForceCount >= service.BRUTE_FORCE_LIMIT {
+      // too many non-word guesses in a row - end the game like running out of guesses
+      dailyWord, err := c.Repository.GetDailyWord()
+      if err != nil {
+        handleError(w, err)
+        return
+      }
+
+      game.IsComplete = true
+      game.IsWon = false
+      game.Streak = 0
+      notification = types.Notification{Type: "error", Message: "Seppo päihitti sinut sanalla ”" + dailyWord.Word + "”"}
+    } else {
+      notification = types.Notification{Type: "error", Message: "Seppo ei tunne sanaa ”" + guessStr + "”"}
+    }
+
+    // set session data
+    if err := service.SetGameToSession(session, game); err != nil {
+      handleError(w, err)
+      return
+    }
+
+    // save session
+    if err := session.Save(r, w); err != nil {
+      handleError(w, err)
+      return
+    }
+
+    handleNotificationResponse(w, notification)
     return
   }
 
@@ -193,6 +228,7 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
 
     // set game data
     game.Guesses = append(game.Guesses, compareResult)
+    game.BruteForceCount = 0
 
     // check game status
     isComplete, isWon := service.GameIsComplete(game)

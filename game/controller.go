@@ -233,12 +233,17 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
 
     // set game data
     game.Guesses = append(game.Guesses, compareResult)
-    game.BruteForceCount = 0
 
     // check game status
     isComplete, isWon := service.GameIsComplete(game)
     game.IsComplete = isComplete
     game.IsWon = isWon
+
+    // reset the brute force counter on a successful guess, but keep the final
+    // count intact once the game is over so it stays visible/shareable
+    if !isComplete {
+      game.BruteForceCount = 0
+    }
 
     if isWon && isComplete {
       game.Streak++

@@ -118,6 +118,11 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
   // report current brute force limit
   game.BruteForceLimit = service.BRUTE_FORCE_LIMIT
 
+  // reveal the daily word once the game has been lost, so a refresh can still show the loss message
+  if game.IsComplete && !game.IsWon {
+    game.Word = dailyWord.Word
+  }
+
   // create json response
   jsonGameData, err := json.Marshal(game)
   if err != nil {

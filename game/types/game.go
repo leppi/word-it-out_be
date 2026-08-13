@@ -11,6 +11,7 @@ type Game struct {
   Streak int `json:"streak"`
   BruteForceCount int `json:"bruteForceCount"`
   BruteForceLimit int `json:"bruteForceLimit"`
+  Word string `json:"word,omitempty"`
 }
 
 type Notification struct {

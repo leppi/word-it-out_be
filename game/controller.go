@@ -6,6 +6,7 @@ import (
   "encoding/json"
   "net/http"
   "log"
+  "time"
   "github.com/gorilla/context"
   "github.com/gorilla/sessions"
   "word-it-out/game/service"
@@ -101,6 +102,8 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request) {
     game.IsWon = false
     game.Guesses = [][][]string{}
     game.BruteForceCount = 0
+    game.StartedAt = time.Now().UnixMilli()
+    game.CompletedAt = 0
 
     // replace game data
     if err := service.SetGameToSession(session, game); err != nil {
@@ -192,6 +195,7 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
       game.IsComplete = true
       game.IsWon = false
       game.Streak = 0
+      game.CompletedAt = time.Now().UnixMilli()
       notification = types.Notification{Type: "error", Message: "Seppo päihitti sinut sanalla ”" + dailyWord.Word + "”"}
     } else {
       notification = types.Notification{Type: "error", Message: "Seppo ei tunne sanaa ”" + guessStr + "”"}
@@ -238,6 +242,10 @@ func (c *Controller) PostGuess(w http.ResponseWriter, r *http.Request) {
     isComplete, isWon := service.GameIsComplete(game)
     game.IsComplete = isComplete
     game.IsWon = isWon
+
+    if isComplete {
+      game.CompletedAt = time.Now().UnixMilli()
+    }
 
     // reset the brute force counter on a successful guess, but keep the final
     // count intact once the game is over so it stays visible/shareable

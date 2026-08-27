@@ -12,6 +12,8 @@ type Game struct {
   BruteForceCount int `json:"bruteForceCount"`
   BruteForceLimit int `json:"bruteForceLimit"`
   Word string `json:"word,omitempty"`
+  StartedAt int64 `json:"startedAt,omitempty"`
+  CompletedAt int64 `json:"completedAt,omitempty"`
 }
 
 type Notification struct {
